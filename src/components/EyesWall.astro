@@ -15,7 +15,20 @@ const t = copy.en
     </h2>
   </div>
   <div class="eyes__find" data-eyes-find aria-hidden="true">
-    <span class="eyes__find-ring"></span>
+    <span class="eyes__find-ring" data-eyes-ring></span>
     <span class="eyes__find-label" data-i18n="proposal">{t.proposal}</span>
+    <button type="button" class="eyes__find-hit" data-cursor-key="read" data-cursor-text={t.cursor.read} data-i18n-aria="proposal" aria-label={t.proposal} aria-describedby="eyes-brief"></button>
+    <div class="brief" id="eyes-brief" role="tooltip" data-brief>
+      <div class="brief__top">
+        <span class="brief__kind" data-brief-kind></span>
+        <span class="brief__code" data-brief-code></span>
+      </div>
+      <p class="brief__title" data-brief-title></p>
+      <ul class="brief__rows" data-brief-rows></ul>
+      <div class="brief__foot">
+        <span class="brief__meter" aria-hidden="true"><span data-brief-meter></span></span>
+        <span class="brief__state" data-brief-state></span>
+      </div>
+    </div>
   </div>
 </section>

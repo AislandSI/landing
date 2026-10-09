@@ -1,4 +1,4 @@
-import { phrase } from '../i18n/locale'
+import { onLocale, phrase } from '../i18n/locale'
 
 type Shape = 'circle' | 'squircle' | 'drop' | 'capsule'
 type EyeStyle = 'pill' | 'dot' | 'oval'
@@ -112,6 +112,13 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
   const canvas = section.querySelector<HTMLCanvasElement>('[data-eyes-canvas]')!
   const ctx = canvas.getContext('2d')!
   const finder = section.querySelector<HTMLElement>('[data-eyes-find]')!
+  const ring = section.querySelector<HTMLElement>('[data-eyes-ring]')!
+  const briefKind = section.querySelector<HTMLElement>('[data-brief-kind]')!
+  const briefCode = section.querySelector<HTMLElement>('[data-brief-code]')!
+  const briefTitle = section.querySelector<HTMLElement>('[data-brief-title]')!
+  const briefRows = section.querySelector<HTMLElement>('[data-brief-rows]')!
+  const briefMeter = section.querySelector<HTMLElement>('[data-brief-meter]')!
+  const briefState = section.querySelector<HTMLElement>('[data-brief-state]')!
   const kicker = section.querySelector<HTMLElement>('[data-eyes-kicker]')!
   const states = section.querySelectorAll<HTMLElement>('[data-eyes-state]')
 
@@ -136,7 +143,29 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
   let lastMove = -10
   let mode: 'watch' | 'found' = 'watch'
   let foundAt = 0
+  let briefIndex = -1
   const find = { x: 0, y: 0 }
+
+  const fillBrief = () => {
+    const brief = phrase().briefs[briefIndex]
+    if (!brief) return
+    briefKind.textContent = brief.kind
+    briefCode.textContent = brief.code
+    briefTitle.textContent = brief.title
+    briefState.textContent = brief.state
+    briefMeter.style.transform = `scaleX(${brief.meter / 100})`
+    briefRows.replaceChildren(
+      ...brief.rows.map(([key, value]) => {
+        const li = document.createElement('li')
+        const k = document.createElement('span')
+        k.textContent = key
+        const v = document.createElement('span')
+        v.textContent = value
+        li.append(k, v)
+        return li
+      })
+    )
+  }
 
   const pack = () => {
     const maxR = Math.max(30, Math.min(92, Math.min(width, height) * 0.1))
@@ -229,9 +258,15 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
       }
     }
     finder.style.transform = `translate3d(${find.x}px, ${find.y}px, 0)`
-    finder.classList.remove('is-visible')
-    void finder.offsetWidth
+    finder.classList.toggle('is-flip', find.x > width * 0.58)
+    finder.classList.toggle('is-high', find.y > height * 0.62)
     finder.classList.add('is-visible')
+    finder.removeAttribute('aria-hidden')
+    briefIndex = (briefIndex + 1) % phrase().briefs.length
+    fillBrief()
+    ring.classList.remove('is-born')
+    void ring.offsetWidth
+    ring.classList.add('is-born')
     foundAt = now
   }
 
@@ -246,7 +281,6 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
     client = { x: event.clientX, y: event.clientY }
     pointer = local(event)
     lastMove = now
-    if (mode === 'found') setMode('watch')
   }
   const onLeave = () => {
     client = null
@@ -265,6 +299,9 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
   section.addEventListener('pointermove', onMove, { passive: true })
   section.addEventListener('pointerleave', onLeave)
   section.addEventListener('pointerdown', onDown)
+  const stopLocale = onLocale(() => {
+    if (briefIndex >= 0) fillBrief()
+  })
 
   const observer = new IntersectionObserver(
     ([entry]) => {
@@ -390,8 +427,9 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
       ctx.clearRect(0, 0, width, height)
 
       for (const bot of bots) {
+        const idle = time - lastMove > 0.7
         let target: { x: number; y: number } | null = pointer
-        if (mode === 'found') {
+        if (mode === 'found' && (idle || !pointer)) {
           const delay = Math.hypot(bot.x - find.x, bot.y - find.y) / 1500
           if (time - foundAt > delay) target = find
         }
@@ -437,6 +475,7 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
       section.removeEventListener('pointermove', onMove)
       section.removeEventListener('pointerleave', onLeave)
       section.removeEventListener('pointerdown', onDown)
+      stopLocale()
     }
   }
 }

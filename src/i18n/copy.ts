@@ -87,7 +87,14 @@ export const copy = {
     ring: 'in progress · signal 0.1 · soon · ',
     soon: 'Soon.',
     progress: 'Work in progress',
-    cursor: { home: 'home', hi: 'hi', down: 'scroll', press: 'press', mail: 'mail' },
+    cursor: { home: 'home', hi: 'hi', down: 'scroll', press: 'press', mail: 'mail', read: 'read' },
+    briefs: [
+      { kind: 'idea', code: 'Δ·04', title: 'A loose thread', rows: [['origin', 'unnamed'], ['weight', 'light'], ['next', 'a question']], meter: 22, state: 'open' },
+      { kind: 'progress', code: 'Σ·14', title: 'A step already taken', rows: [['cycle', '3 of 5'], ['block', 'gone'], ['handoff', 'waiting']], meter: 60, state: 'moving' },
+      { kind: 'improvement', code: '⊕·07', title: 'Less noise, same meaning', rows: [['rereads', '0'], ['kept', 'the why'], ['signal', 'clearer']], meter: 78, state: 'quieter' },
+      { kind: 'idea', code: 'Δ·11', title: 'Two areas, one glance', rows: [['link', 'new'], ['overlap', 'found'], ['owner', 'undecided']], meter: 18, state: 'sketched' },
+      { kind: 'progress', code: 'Σ·02', title: 'Continuity, unbroken', rows: [['resumed', 'where it stopped'], ['context', 'warm'], ['drift', 'none']], meter: 71, state: 'held' }
+    ],
     feed: [
       'agent·03 spotted a new dependency',
       'proposal ready · waiting on your judgment',
@@ -134,7 +141,14 @@ export const copy = {
     ring: 'en construcción · señal 0.1 · pronto · ',
     soon: 'Pronto.',
     progress: 'Trabajo en progreso',
-    cursor: { home: 'inicio', hi: 'hola', down: 'baja', press: 'pulsa', mail: 'mail' },
+    cursor: { home: 'inicio', hi: 'hola', down: 'baja', press: 'pulsa', mail: 'mail', read: 'leer' },
+    briefs: [
+      { kind: 'idea', code: 'Δ·04', title: 'Un hilo suelto', rows: [['origen', 'sin nombre'], ['peso', 'leve'], ['sigue', 'una pregunta']], meter: 22, state: 'abierta' },
+      { kind: 'avance', code: 'Σ·14', title: 'Un paso ya dado', rows: [['ciclo', '3 de 5'], ['bloqueo', 'resuelto'], ['relevo', 'en espera']], meter: 60, state: 'en marcha' },
+      { kind: 'mejora', code: '⊕·07', title: 'Menos ruido, el mismo sentido', rows: [['relecturas', '0'], ['conserva', 'el porqué'], ['señal', 'más clara']], meter: 78, state: 'más quieta' },
+      { kind: 'idea', code: 'Δ·11', title: 'Dos áreas, un vistazo', rows: [['vínculo', 'nuevo'], ['cruce', 'detectado'], ['dueño', 'sin decidir']], meter: 18, state: 'bosquejada' },
+      { kind: 'avance', code: 'Σ·02', title: 'Continuidad, sin corte', rows: [['retoma', 'donde quedó'], ['contexto', 'tibio'], ['deriva', 'ninguna']], meter: 71, state: 'sostenida' }
+    ],
     feed: [
       'agente·03 detectó una dependencia nueva',
       'propuesta preparada · espera tu criterio',
