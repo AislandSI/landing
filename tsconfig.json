@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@product": ["../windows/product.config.json"]
+      "@product": ["./product.config.json"]
     }
   }
 }
