@@ -1,0 +1,16 @@
+---
+import BrandMark from './BrandMark.astro'
+---
+
+<div class="preloader" data-preloader aria-hidden="true">
+  <div class="preloader__core">
+    <BrandMark class="preloader__mark" />
+    <div class="preloader__meta">
+      <span data-i18n="preloader">waking the ecosystem</span>
+      <span class="preloader__count" data-preloader-count>000</span>
+    </div>
+    <div class="preloader__bar"><span data-preloader-bar></span></div>
+  </div>
+  <div class="preloader__shutter preloader__shutter--top"></div>
+  <div class="preloader__shutter preloader__shutter--bottom"></div>
+</div>

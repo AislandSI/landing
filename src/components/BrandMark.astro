@@ -1,0 +1,19 @@
+---
+import { LOGO_PATHS, LOGO_VIEWBOX } from '../brand/logo'
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<svg
+  class:list={['brand-mark', className]}
+  viewBox={`0 0 ${LOGO_VIEWBOX.width} ${LOGO_VIEWBOX.height}`}
+  fill="currentColor"
+  aria-hidden="true"
+  focusable="false"
+>
+  {LOGO_PATHS.map((d) => <path d={d} />)}
+</svg>

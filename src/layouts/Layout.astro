@@ -1,0 +1,52 @@
+---
+import '../styles/global.css'
+import { PRODUCT_NAME } from '../config/product'
+import { copy } from '../i18n/copy'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = `${PRODUCT_NAME} — ${copy.en.metaTitle}`,
+  description = copy.en.metaDescription
+} = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#04040a" />
+    <meta name="color-scheme" content="dark" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <script is:inline>
+      document.documentElement.classList.add('js')
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('motion')
+      }
+    </script>
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+    <script>
+      import { start } from '../scripts/main'
+      start()
+    </script>
+  </body>
+</html>

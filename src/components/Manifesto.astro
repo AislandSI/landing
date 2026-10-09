@@ -1,0 +1,48 @@
+---
+import { copy } from '../i18n/copy'
+
+const chapters = copy.en.chapters
+const words = (text: string) => text.split(' ')
+---
+
+<section class="manifesto" id="manifiesto" data-manifesto style={`--chapters:${chapters.length}`}>
+  <div class="manifesto__sticky">
+    <ol class="manifesto__index" aria-hidden="true">
+      {chapters.map((chapter, index) => (
+        <li class="manifesto__index-item" data-chapter-index={index}>
+          <span class="manifesto__num">{String(index + 1).padStart(2, '0')}</span>
+          <span class="manifesto__label" data-i18n={`chapters.${index}.label`}>{chapter.label}</span>
+        </li>
+      ))}
+      <li class="manifesto__progress"><span data-manifesto-bar></span></li>
+    </ol>
+
+    <div class="manifesto__chapters">
+      {chapters.map((chapter, index) => (
+        <article class="chapter" data-chapter={index}>
+          <p class="chapter__kicker">
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <span class="chapter__rule" aria-hidden="true"></span>
+            <span data-i18n={`chapters.${index}.label`}>{chapter.label}</span>
+          </p>
+          <h2 class="chapter__title" data-i18n-chapter={index}>
+            {words(chapter.lead).map((word, i) => <span class="w" style={`--wi:${i}`}><span>{word}</span></span>)}
+            <br />
+            {words(chapter.accent).map((word, i) => (
+              <span class="w w--accent" style={`--wi:${words(chapter.lead).length + i}`}><span>{word}</span></span>
+            ))}
+          </h2>
+          <ul class="chapter__sub">
+            {chapter.subs.map((item, itemIndex) => <li data-i18n={`chapters.${index}.subs.${itemIndex}`}>{item}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+
+    <div class="manifesto__readout" aria-hidden="true">
+      <span data-i18n="form">{copy.en.form}</span>
+      <span class="manifesto__shape" data-shape-name>{copy.en.shapes[1]}</span>
+      <span class="manifesto__coords" data-coords>0.000 · 0.000</span>
+    </div>
+  </div>
+</section>

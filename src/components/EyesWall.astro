@@ -1,0 +1,21 @@
+---
+import { copy } from '../i18n/copy'
+
+const t = copy.en
+---
+
+<section class="eyes" id="despiertos" data-eyes aria-labelledby="eyes-title">
+  <canvas class="eyes__canvas" data-eyes-canvas aria-hidden="true"></canvas>
+  <div class="eyes__veil" aria-hidden="true"></div>
+  <div class="eyes__copy">
+    <p class="eyes__kicker" data-eyes-kicker>{t.eyesIdle}</p>
+    <h2 class="eyes__title" id="eyes-title">
+      <span class="eyes__state is-active" data-eyes-state="watch" data-i18n-html="eyesWatch" set:html={t.eyesWatch} />
+      <span class="eyes__state" data-eyes-state="found" data-i18n-html="eyesHit" set:html={t.eyesHit} />
+    </h2>
+  </div>
+  <div class="eyes__find" data-eyes-find aria-hidden="true">
+    <span class="eyes__find-ring"></span>
+    <span class="eyes__find-label" data-i18n="proposal">{t.proposal}</span>
+  </div>
+</section>

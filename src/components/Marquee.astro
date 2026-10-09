@@ -1,0 +1,38 @@
+---
+import { copy } from '../i18n/copy'
+
+const t = copy.en
+const rowA = t.marqueeA
+const rowB = t.marqueeB
+---
+
+<section class="marquee" aria-label={t.marqueeLabel} data-i18n-aria="marqueeLabel" data-marquee>
+  <div class="marquee__row" data-marquee-row="1">
+    <div class="marquee__track">
+      {[0, 1, 2].map((copy) => (
+        <span class="marquee__set" aria-hidden={copy > 0 ? 'true' : undefined}>
+          {rowA.map((word) => (
+            <>
+              <span class="marquee__word" data-i18n-slot="marqueeA">{word}</span>
+              <span class="marquee__star" aria-hidden="true">✦</span>
+            </>
+          ))}
+        </span>
+      ))}
+    </div>
+  </div>
+  <div class="marquee__row marquee__row--ghost" data-marquee-row="-1" aria-hidden="true">
+    <div class="marquee__track">
+      {[0, 1, 2].map(() => (
+        <span class="marquee__set">
+          {rowB.map((word) => (
+            <>
+              <span class="marquee__word" data-i18n-slot="marqueeB">{word}</span>
+              <span class="marquee__star">◦</span>
+            </>
+          ))}
+        </span>
+      ))}
+    </div>
+  </div>
+</section>

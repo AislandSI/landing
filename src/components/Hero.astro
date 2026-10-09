@@ -1,0 +1,101 @@
+---
+import BrandMark from './BrandMark.astro'
+import { PRODUCT_NAME } from '../config/product'
+import { copy } from '../i18n/copy'
+
+const t = copy.en
+
+const letters = [...PRODUCT_NAME]
+const bots = [
+  { hue: 'violet', size: 54 },
+  { hue: 'cyan', size: 40 },
+  { hue: 'pink', size: 46 },
+  { hue: 'indigo', size: 36 },
+  { hue: 'cyan', size: 30 },
+  { hue: 'pink', size: 34 }
+]
+---
+
+<section class="hero" id="inicio" data-hero>
+  <header class="hud">
+    <a class="lockup" href="#inicio" data-cursor-key="home" data-cursor-text={t.cursor.home}>
+      <BrandMark class="lockup__mark" />
+      <span class="lockup__name">{PRODUCT_NAME}</span>
+    </a>
+    <span class="hud__status" role="status">
+      <span class="hud__beat" aria-hidden="true"></span>
+      <span><span data-agents>07</span> <span data-i18n="agents">{t.agents}</span></span>
+    </span>
+    <div class="hud__tools">
+      <div class="hud__lang" role="group" aria-label={t.langLabel} data-i18n-aria="langLabel">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false">ES</button>
+      </div>
+      <span class="hud__clock" aria-hidden="true"><span data-clock>--:--:--</span> · <span data-i18n="signal">{t.signal}</span></span>
+    </div>
+  </header>
+
+  <div class="hero__stage" data-stage>
+    <svg class="orbits" viewBox="-500 -500 1000 1000" aria-hidden="true" data-orbits>
+      <ellipse rx="300" ry="96" class="orbits__line" />
+      <ellipse rx="420" ry="150" class="orbits__line orbits__line--far" />
+      <ellipse rx="220" ry="58" class="orbits__line orbits__line--near" />
+    </svg>
+
+    <div class="tile-wrap" data-tile-wrap>
+      <span class="tile__halo" aria-hidden="true"></span>
+      <span class="tile__beat" aria-hidden="true"></span>
+      <span class="tile__beat tile__beat--late" aria-hidden="true"></span>
+      <div class="tile" data-tile role="img" aria-label={PRODUCT_NAME}>
+        <span class="tile__gradient" aria-hidden="true"></span>
+        <span class="tile__noise" aria-hidden="true"></span>
+        <span class="tile__glare" aria-hidden="true"></span>
+        <BrandMark class="tile__mark" />
+      </div>
+    </div>
+
+    {bots.map((bot, index) => (
+      <button
+        type="button"
+        class={`bot bot--${bot.hue}`}
+        style={`--size:${bot.size}px`}
+        data-bot={index}
+        data-cursor-key="hi"
+        data-cursor-text={t.cursor.hi}
+        data-i18n-aria="agent"
+        aria-label={t.agent}
+      >
+        <span class="bot__body">
+          <span class="bot__eye"><span class="bot__pupil"></span></span>
+          <span class="bot__eye"><span class="bot__pupil"></span></span>
+        </span>
+        <span class="bot__say" aria-hidden="true">!</span>
+      </button>
+    ))}
+  </div>
+
+  <div class="hero__row">
+    <p class="hero__lede">
+      <span data-i18n="lede">{t.lede}</span><br />
+      <em class="hero__word" data-rotator>{t.words[0]}</em><span class="hero__dot">.</span>
+    </p>
+    <div class="hero__aside">
+      <span class="tag"><span class="tag__dot"></span><span data-i18n="building">{t.building}</span></span>
+      <a class="scroll-cue" href="#manifiesto" data-cursor-key="down" data-cursor-text={t.cursor.down}>
+        <span data-i18n="scroll">{t.scroll}</span>
+        <span class="scroll-cue__line" aria-hidden="true"></span>
+      </a>
+    </div>
+  </div>
+
+  <h1 class="hero__name" aria-label={PRODUCT_NAME} data-name>
+    {letters.map((letter) => (
+      <span class="hero__letter" aria-hidden="true"><span data-l={letter}>{letter}</span></span>
+    ))}
+  </h1>
+
+  <span class="corner corner--tl" aria-hidden="true"></span>
+  <span class="corner corner--tr" aria-hidden="true"></span>
+  <span class="corner corner--bl" aria-hidden="true"></span>
+  <span class="corner corner--br" aria-hidden="true"></span>
+</section>
