@@ -1,20 +1,27 @@
 import { phrase } from '../i18n/locale'
 
-interface Eye {
+type Shape = 'circle' | 'squircle' | 'drop' | 'capsule'
+type EyeStyle = 'pill' | 'dot' | 'oval'
+
+interface Bot {
   x: number
   y: number
   r: number
+  shape: Shape
+  skin: number
+  eyes: EyeStyle
+  blush: boolean
+  phase: number
   lx: number
   ly: number
-  sx: number
-  sy: number
-  nextSaccade: number
+  tilt: number
   wakeAt: number
   blinkAt: number
   blinkStart: number
   open: number
-  dilation: number
-  sprite: number
+  joy: number
+  joyUntil: number
+  squishAt: number
   speed: number
 }
 
@@ -24,65 +31,81 @@ export interface EyesWall {
   destroy(): void
 }
 
-const IRIS_PALETTES: [string, string, string][] = [
-  ['#ffd2fb', '#dc5ee5', '#3a0f52'],
-  ['#c8fbff', '#12b8c8', '#0c2650'],
-  ['#e6d6ff', '#a065ee', '#1e1460'],
-  ['#ffe0f4', '#8a5cf0', '#09363f']
+const SKINS: [string, string, string][] = [
+  ['#dcc4ff', '#a065ee', '#4b2fb8'],
+  ['#ffd0f8', '#dc5ee5', '#7a2fc9'],
+  ['#b4f8fb', '#16b5c5', '#16568c'],
+  ['#b0aaff', '#5b50e2', '#231b7a'],
+  ['#ffffff', '#ebe4fb', '#9d90c8']
 ]
-const BLINK = 0.17
+const SHAPES: Shape[] = ['circle', 'squircle', 'drop', 'capsule']
+const STYLES: EyeStyle[] = ['pill', 'dot', 'oval']
+const BLINK = 0.16
 const IDLE = 2.2
 const FOUND_CYCLE = 5.5
+const SPRITE = 256
+const SPAN = 1.2
 
-function sprite(size: number, paint: (ctx: CanvasRenderingContext2D, s: number) => void) {
+const pick = <T,>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)]
+
+function tracePath(ctx: CanvasRenderingContext2D, shape: Shape) {
+  ctx.beginPath()
+  if (shape === 'circle') {
+    ctx.arc(0, 0, 1, 0, Math.PI * 2)
+  } else if (shape === 'squircle') {
+    ctx.roundRect(-0.94, -0.9, 1.88, 1.8, 0.62)
+  } else if (shape === 'capsule') {
+    ctx.roundRect(-1, -0.74, 2, 1.48, 0.74)
+  } else {
+    const top = { x: 0, y: -1.02 }
+    const right = { x: 1.04, y: 0.82 }
+    const left = { x: -1.04, y: 0.82 }
+    ctx.moveTo((left.x + top.x) / 2, (left.y + top.y) / 2)
+    ctx.arcTo(top.x, top.y, right.x, right.y, 0.52)
+    ctx.arcTo(right.x, right.y, left.x, left.y, 0.46)
+    ctx.arcTo(left.x, left.y, top.x, top.y, 0.46)
+    ctx.closePath()
+  }
+}
+
+function makeBody(shape: Shape, [light, base, deep]: [string, string, string]) {
   const canvas = document.createElement('canvas')
-  canvas.width = canvas.height = size
+  canvas.width = canvas.height = SPRITE
   const ctx = canvas.getContext('2d')
-  if (ctx) paint(ctx, size)
+  if (!ctx) return canvas
+  const unit = SPRITE / (SPAN * 2)
+  ctx.translate(SPRITE / 2, SPRITE / 2)
+  ctx.scale(unit, unit)
+
+  tracePath(ctx, shape)
+  const fill = ctx.createRadialGradient(-0.4, -0.5, 0.05, -0.1, -0.1, 1.75)
+  fill.addColorStop(0, light)
+  fill.addColorStop(0.45, base)
+  fill.addColorStop(1, deep)
+  ctx.fillStyle = fill
+  ctx.fill()
+
+  ctx.save()
+  tracePath(ctx, shape)
+  ctx.clip()
+  const under = ctx.createRadialGradient(0.35, 1.05, 0.1, 0.35, 1.05, 1.1)
+  under.addColorStop(0, 'rgba(10, 4, 30, 0.45)')
+  under.addColorStop(1, 'rgba(10, 4, 30, 0)')
+  ctx.fillStyle = under
+  ctx.fillRect(-SPAN, -SPAN, SPAN * 2, SPAN * 2)
+  ctx.filter = `blur(${unit * 0.06}px)`
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.55)'
+  ctx.beginPath()
+  ctx.ellipse(-0.4, -0.52, 0.34, 0.17, -0.55, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.filter = 'none'
+  ctx.restore()
+
+  tracePath(ctx, shape)
+  ctx.lineWidth = 0.03
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)'
+  ctx.stroke()
   return canvas
-}
-
-function makeSclera() {
-  return sprite(160, (ctx, s) => {
-    const c = s / 2
-    const g = ctx.createRadialGradient(c, c * 1.1, s * 0.05, c, c, c)
-    g.addColorStop(0, '#fbf9ff')
-    g.addColorStop(0.62, '#e9e4f4')
-    g.addColorStop(1, '#8e86a6')
-    ctx.fillStyle = g
-    ctx.fillRect(0, 0, s, s)
-    const lid = ctx.createLinearGradient(0, 0, 0, s * 0.45)
-    lid.addColorStop(0, 'rgba(20,10,40,0.55)')
-    lid.addColorStop(1, 'rgba(20,10,40,0)')
-    ctx.fillStyle = lid
-    ctx.fillRect(0, 0, s, s)
-  })
-}
-
-function makeIris([inner, mid, outer]: [string, string, string], seed: number) {
-  return sprite(160, (ctx, s) => {
-    const c = s / 2
-    const g = ctx.createRadialGradient(c, c, s * 0.08, c, c, c)
-    g.addColorStop(0, inner)
-    g.addColorStop(0.45, mid)
-    g.addColorStop(0.86, outer)
-    g.addColorStop(1, '#05030a')
-    ctx.fillStyle = g
-    ctx.beginPath()
-    ctx.arc(c, c, c, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.globalCompositeOperation = 'overlay'
-    for (let i = 0; i < 90; i++) {
-      const a = (i / 90) * Math.PI * 2 + Math.sin(i * 12.9898 + seed) * 0.05
-      const len = 0.55 + ((Math.sin(i * 78.233 + seed) + 1) / 2) * 0.35
-      ctx.strokeStyle = i % 3 ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.35)'
-      ctx.lineWidth = s * 0.008
-      ctx.beginPath()
-      ctx.moveTo(c + Math.cos(a) * c * 0.2, c + Math.sin(a) * c * 0.2)
-      ctx.lineTo(c + Math.cos(a) * c * len, c + Math.sin(a) * c * len)
-      ctx.stroke()
-    }
-  })
 }
 
 export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
@@ -92,10 +115,18 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
   const kicker = section.querySelector<HTMLElement>('[data-eyes-kicker]')!
   const states = section.querySelectorAll<HTMLElement>('[data-eyes-state]')
 
-  const sclera = makeSclera()
-  const irises = IRIS_PALETTES.map((palette, index) => makeIris(palette, index * 3.7))
+  const bodies = new Map<string, HTMLCanvasElement>()
+  const body = (shape: Shape, skin: number) => {
+    const key = `${shape}:${skin}`
+    let sprite = bodies.get(key)
+    if (!sprite) {
+      sprite = makeBody(shape, SKINS[skin])
+      bodies.set(key, sprite)
+    }
+    return sprite
+  }
 
-  let eyes: Eye[] = []
+  let bots: Bot[] = []
   let width = 0
   let height = 0
   let visible = false
@@ -108,28 +139,26 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
   const find = { x: 0, y: 0 }
 
   const pack = () => {
-    const maxR = Math.max(26, Math.min(80, Math.min(width, height) * 0.085))
-    const minR = Math.max(9, maxR * 0.26)
-    const gap = Math.max(4, maxR * 0.1)
+    const maxR = Math.max(30, Math.min(92, Math.min(width, height) * 0.1))
+    const minR = Math.max(16, maxR * 0.42)
+    const gap = Math.max(10, maxR * 0.28)
     const radii: number[] = []
-    for (let i = 0; i < 900; i++) radii.push(minR + (maxR - minR) * Math.pow(Math.random(), 2.4))
+    for (let i = 0; i < 500; i++) radii.push(minR + (maxR - minR) * Math.pow(Math.random(), 1.8))
     radii.sort((a, b) => b - a)
-    const placed: Eye[] = []
+    const placed: Bot[] = []
     const cx = width / 2
     const cy = height / 2
     for (const r of radii) {
       for (let attempt = 0; attempt < 30; attempt++) {
-        const x = r + Math.random() * (width - r * 2)
-        const y = r + Math.random() * (height - r * 2)
-        const ex = (x - cx) / (width * 0.3)
-        const ey = (y - cy) / (height * 0.2)
+        const x = r * 1.2 + Math.random() * (width - r * 2.4)
+        const y = r * 1.2 + Math.random() * (height - r * 2.4)
+        const ex = (x - cx) / (width * 0.32)
+        const ey = (y - cy) / (height * 0.22)
         if (ex * ex + ey * ey < 1) continue
         let ok = true
         for (const other of placed) {
-          const dx = other.x - x
-          const dy = other.y - y
-          const min = other.r * 1.12 + r * 1.12 + gap
-          if (dx * dx + dy * dy < min * min) {
+          const min = other.r * 1.2 + r * 1.2 + gap
+          if ((other.x - x) ** 2 + (other.y - y) ** 2 < min * min) {
             ok = false
             break
           }
@@ -137,21 +166,26 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
         if (!ok) continue
         placed.push({
           x, y, r,
-          lx: 0, ly: 0, sx: 0, sy: 0,
-          nextSaccade: Math.random() * 2,
+          shape: pick(SHAPES),
+          skin: Math.floor(Math.random() * SKINS.length),
+          eyes: pick(STYLES),
+          blush: Math.random() < 0.45,
+          phase: Math.random() * Math.PI * 2,
+          lx: 0, ly: 0, tilt: 0,
           wakeAt: woke ? 0 : Infinity,
           blinkAt: 1 + Math.random() * 6,
           blinkStart: -1,
-          open: woke || reduce ? 1 : 0,
-          dilation: 0.3,
-          sprite: Math.floor(Math.random() * irises.length),
-          speed: 4 + Math.random() * 5
+          open: 1,
+          joy: 0,
+          joyUntil: 0,
+          squishAt: -10,
+          speed: 3 + Math.random() * 4
         })
         break
       }
-      if (placed.length > 190) break
+      if (placed.length >= 70) break
     }
-    eyes = placed
+    bots = placed
   }
 
   const resize = () => {
@@ -169,8 +203,8 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
     woke = true
     lastMove = now
     const origin = pointer ?? { x: width / 2, y: height / 2 }
-    for (const eye of eyes) {
-      eye.wakeAt = reduce ? 0 : now + Math.hypot(eye.x - origin.x, eye.y - origin.y) / 1300 + Math.random() * 0.25
+    for (const bot of bots) {
+      bot.wakeAt = reduce ? 0 : now + Math.hypot(bot.x - origin.x, bot.y - origin.y) / 1400 + Math.random() * 0.2
     }
   }
 
@@ -220,10 +254,10 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
   }
   const onDown = (event: PointerEvent) => {
     const p = local(event)
-    for (const eye of eyes) {
-      if (Math.hypot(eye.x - p.x, eye.y - p.y) < eye.r * 1.1) {
-        eye.blinkStart = now
-        eye.dilation = 1
+    for (const bot of bots) {
+      if (Math.hypot(bot.x - p.x, bot.y - p.y) < bot.r * 1.15) {
+        bot.squishAt = now
+        bot.joyUntil = now + 1.1
       }
     }
   }
@@ -241,52 +275,96 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
   )
   observer.observe(section)
 
-  const drawEye = (eye: Eye) => {
-    const { x, y, r } = eye
-    ctx.beginPath()
-    ctx.arc(x, y, r * 1.12, 0, Math.PI * 2)
-    ctx.fillStyle = '#08070f'
-    ctx.fill()
-    ctx.lineWidth = 1
-    ctx.strokeStyle = 'rgba(160, 101, 238, 0.18)'
-    ctx.stroke()
-
-    if (eye.open < 0.03) {
+  const drawEye = (bot: Bot, ex: number, ey: number, side: number) => {
+    const { r } = bot
+    const ink = '#150d2a'
+    if (bot.joy > 0.5) {
       ctx.beginPath()
-      ctx.moveTo(x - r * 0.8, y)
-      ctx.quadraticCurveTo(x, y + r * 0.18, x + r * 0.8, y)
-      ctx.strokeStyle = 'rgba(220, 210, 255, 0.35)'
-      ctx.lineWidth = Math.max(1, r * 0.06)
+      ctx.arc(ex, ey + r * 0.06, r * 0.11, Math.PI * 1.1, Math.PI * 1.9)
+      ctx.lineWidth = r * 0.075
+      ctx.lineCap = 'round'
+      ctx.strokeStyle = ink
       ctx.stroke()
       return
     }
+    const open = Math.max(0.08, bot.open)
+    ctx.fillStyle = ink
+    ctx.beginPath()
+    if (bot.eyes === 'pill') {
+      const w = r * 0.15
+      const h = r * 0.36 * open
+      ctx.save()
+      ctx.translate(ex, ey)
+      ctx.rotate(0.32 + side * 0.04)
+      ctx.roundRect(-w / 2, -h / 2, w, h, w / 2)
+      ctx.restore()
+      ctx.fill()
+      return
+    }
+    const rx = bot.eyes === 'dot' ? r * 0.12 : r * 0.13
+    const ry = (bot.eyes === 'dot' ? r * 0.12 : r * 0.2) * open
+    ctx.ellipse(ex, ey, rx, ry, 0, 0, Math.PI * 2)
+    ctx.fill()
+    if (open > 0.5) {
+      ctx.beginPath()
+      ctx.arc(ex - rx * 0.32, ey - ry * 0.38, rx * 0.34, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
+      ctx.fill()
+    }
+  }
+
+  const drawBot = (bot: Bot, time: number) => {
+    const age = time - bot.wakeAt
+    if (age < 0) return
+    const pop = age >= 0.55 ? 1 : 1 - Math.pow(1 - age / 0.55, 3) * Math.cos((age / 0.55) * Math.PI * 1.6)
+    const squishT = time - bot.squishAt
+    const squish = squishT < 0.6 ? Math.sin(squishT * 18) * Math.exp(-squishT * 6) * 0.22 : 0
+    const bob = reduce ? 0 : Math.sin(time * 1.4 + bot.phase) * bot.r * 0.06
+    const { r } = bot
 
     ctx.save()
+    ctx.translate(bot.x + bot.lx * r * 0.06, bot.y + bob)
+
     ctx.beginPath()
-    ctx.ellipse(x, y, r, r * eye.open, 0, 0, Math.PI * 2)
-    ctx.clip()
-    ctx.drawImage(sclera, x - r, y - r, r * 2, r * 2)
-    const ix = x + (eye.lx + eye.sx) * r * 0.42
-    const iy = y + (eye.ly + eye.sy) * r * 0.42
-    const ri = r * 0.56
-    ctx.drawImage(irises[eye.sprite], ix - ri, iy - ri, ri * 2, ri * 2)
-    ctx.beginPath()
-    ctx.arc(ix, iy, ri * (0.34 + eye.dilation * 0.26), 0, Math.PI * 2)
-    ctx.fillStyle = '#040208'
+    ctx.ellipse(0, r * 1.18 - bob, r * 0.72 * pop, r * 0.14 * pop, 0, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)'
     ctx.fill()
-    ctx.beginPath()
-    ctx.arc(ix - ri * 0.34, iy - ri * 0.36, ri * 0.15, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(255,255,255,0.92)'
-    ctx.fill()
-    ctx.beginPath()
-    ctx.arc(ix + ri * 0.28, iy + ri * 0.3, ri * 0.06, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(255,255,255,0.6)'
-    ctx.fill()
-    ctx.lineWidth = r * 0.16
-    ctx.strokeStyle = 'rgba(6, 4, 14, 0.55)'
-    ctx.beginPath()
-    ctx.ellipse(x, y, r, r * eye.open, 0, 0, Math.PI * 2)
-    ctx.stroke()
+
+    ctx.rotate(bot.tilt)
+    ctx.scale(pop * (1 + squish), pop * (1 - squish))
+    const size = r * SPAN * 2
+    ctx.drawImage(body(bot.shape, bot.skin), -size / 2, -size / 2, size, size)
+
+    const fx = bot.lx * r * 0.3
+    const fy = bot.ly * r * 0.22 + (bot.shape === 'drop' ? r * 0.18 : 0)
+    const spread = bot.shape === 'drop' ? r * 0.26 : r * 0.31
+
+    if (bot.blush) {
+      ctx.fillStyle = bot.skin === 1 ? 'rgba(255, 140, 200, 0.55)' : 'rgba(255, 120, 190, 0.38)'
+      for (const side of [-1, 1]) {
+        ctx.beginPath()
+        ctx.ellipse(fx + side * spread * 1.45, fy + r * 0.24, r * 0.13, r * 0.07, 0, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    drawEye(bot, fx - spread, fy - r * 0.06, -1)
+    drawEye(bot, fx + spread, fy - r * 0.06, 1)
+
+    if (mode === 'found' && bot.joy < 0.5) {
+      ctx.beginPath()
+      ctx.ellipse(fx, fy + r * 0.3, r * 0.07, r * 0.09, 0, 0, Math.PI * 2)
+      ctx.fillStyle = '#150d2a'
+      ctx.fill()
+    } else if (bot.joy > 0.5) {
+      ctx.beginPath()
+      ctx.arc(fx, fy + r * 0.2, r * 0.12, Math.PI * 0.15, Math.PI * 0.85)
+      ctx.lineWidth = r * 0.06
+      ctx.lineCap = 'round'
+      ctx.strokeStyle = '#150d2a'
+      ctx.stroke()
+    }
+
     ctx.restore()
   }
 
@@ -310,12 +388,11 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
       }
 
       ctx.clearRect(0, 0, width, height)
-      const k = Math.min(1, dt * 60)
 
-      for (const eye of eyes) {
+      for (const bot of bots) {
         let target: { x: number; y: number } | null = pointer
         if (mode === 'found') {
-          const delay = Math.hypot(eye.x - find.x, eye.y - find.y) / 1500
+          const delay = Math.hypot(bot.x - find.x, bot.y - find.y) / 1500
           if (time - foundAt > delay) target = find
         }
 
@@ -323,43 +400,35 @@ export function mountEyes(section: HTMLElement, reduce: boolean): EyesWall {
         let ty = 0
         let near = 0
         if (target) {
-          const dx = target.x - eye.x
-          const dy = target.y - eye.y
+          const dx = target.x - bot.x
+          const dy = target.y - bot.y
           const len = Math.hypot(dx, dy) || 1
-          const mag = Math.min(1, len / (eye.r * 3 + 50))
+          const mag = Math.min(1, len / (bot.r * 3 + 60))
           tx = (dx / len) * mag
           ty = (dy / len) * mag
-          near = target === pointer ? Math.max(0, 1 - len / (eye.r * 2.2)) : 0
+          near = target === pointer ? Math.max(0, 1 - len / (bot.r * 2.6)) : 0
         }
-        const follow = Math.min(1, dt * eye.speed)
-        eye.lx += (tx - eye.lx) * follow
-        eye.ly += (ty - eye.ly) * follow
+        const follow = Math.min(1, dt * bot.speed)
+        bot.lx += (tx - bot.lx) * follow
+        bot.ly += (ty - bot.ly) * follow
+        bot.tilt += (bot.lx * 0.14 - bot.tilt) * follow
 
-        if (!reduce && time > eye.nextSaccade) {
-          eye.sx = (Math.random() - 0.5) * 0.14
-          eye.sy = (Math.random() - 0.5) * 0.1
-          eye.nextSaccade = time + 0.4 + Math.random() * 2.2
-        }
-
-        const dilationTarget = mode === 'found' ? 0.85 : 0.25 + near * 0.6
-        eye.dilation += (dilationTarget - eye.dilation) * Math.min(1, dt * 3)
+        const joyTarget = near > 0.35 || time < bot.joyUntil ? 1 : 0
+        bot.joy += (joyTarget - bot.joy) * Math.min(1, dt * 10)
 
         let open = 1
-        if (time < eye.wakeAt) open = 0
-        else if (time < eye.wakeAt + 0.45) open = Math.sin(((time - eye.wakeAt) / 0.45) * Math.PI * 0.5)
-        if (!reduce && time > eye.blinkAt) {
-          eye.blinkStart = time
-          eye.blinkAt = time + 2 + Math.random() * 7
+        if (!reduce && time > bot.blinkAt) {
+          bot.blinkStart = time
+          bot.blinkAt = time + 2.5 + Math.random() * 6
         }
-        if (eye.blinkStart >= 0) {
-          const t = (time - eye.blinkStart) / BLINK
-          if (t >= 1) eye.blinkStart = -1
-          else open *= 1 - Math.sin(t * Math.PI)
+        if (bot.blinkStart >= 0) {
+          const t = (time - bot.blinkStart) / BLINK
+          if (t >= 1) bot.blinkStart = -1
+          else open = 1 - Math.sin(t * Math.PI)
         }
-        if (near > 0.55) open *= 0.35
-        eye.open += (open - eye.open) * Math.min(1, k * 0.6)
+        bot.open = open
 
-        drawEye(eye)
+        drawBot(bot, time)
       }
     },
     resize,

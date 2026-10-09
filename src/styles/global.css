@@ -1122,15 +1122,19 @@ html:not(.js) .manifesto__readout { display: none; }
   filter: blur(12px);
   transform: translateY(24px) scale(0.98);
   transition:
-    opacity 0.7s ease,
-    filter 0.7s ease,
-    transform 0.9s var(--ease-out);
+    opacity 0.25s ease,
+    filter 0.25s ease,
+    transform 0.25s ease;
 }
 
 .eyes__state.is-active {
   opacity: 1;
   filter: blur(0);
   transform: none;
+  transition:
+    opacity 0.6s ease 0.22s,
+    filter 0.6s ease 0.22s,
+    transform 0.9s var(--ease-out) 0.22s;
 }
 
 .eyes__state em {
