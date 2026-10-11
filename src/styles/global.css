@@ -5,8 +5,8 @@
   --muted: rgb(243 240 251 / 0.58);
   --faint: rgb(243 240 251 / 0.26);
   --line: rgb(243 240 251 / 0.1);
-  --pink: #dc5ee5;
-  --violet: #a065ee;
+  --pink: #efa0ff;
+  --violet: #6f00ff;
   --indigo: #3830b5;
   --cyan: #008f9e;
   --cyan-glow: #2ad4e2;
@@ -39,6 +39,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  filter: saturate(0.8);
 }
 
 html.lenis,
@@ -110,6 +111,7 @@ main {
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  filter: saturate(1);
 }
 
 .cosmos__canvas {
@@ -365,6 +367,7 @@ main {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.24em;
+  text-transform: lowercase;
 }
 
 .hud__status {
@@ -1706,7 +1709,7 @@ html.is-solo body {
   font-size: 0.86em;
   letter-spacing: -0.05em;
   padding: 0 0.04em;
-  background: linear-gradient(100deg, #ffb3f6 0%, var(--pink) 25%, var(--violet) 55%, var(--cyan-glow) 100%);
+  background: linear-gradient(100deg, #ffb3f6 0%, var(--pink) 18%, var(--violet) 28%, var(--cyan-glow) 60%);
   background-size: 160% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -1721,7 +1724,7 @@ html.is-solo body {
   display: inline-flex;
   align-items: center;
   gap: clamp(14px, 1.6vw, 26px);
-  font-family: var(--display);
+  font-family: var(--);
   font-size: clamp(1.15rem, 2.2vw, 2.2rem);
   font-weight: 600;
   line-height: 1;
@@ -1732,6 +1735,7 @@ html.is-solo body {
   display: inline-flex;
   gap: 0.42em;
   margin-right: -0.42em;
+  font-family: var(--sans);
 }
 
 .finale__brand-letter {
@@ -1741,11 +1745,11 @@ html.is-solo body {
 }
 
 .finale__brand-letter.is-accent {
-  background: linear-gradient(120deg, #ffb3f6, var(--pink) 20%, var(--violet) 55%, var(--cyan-glow) 85%);
+  background: linear-gradient(120deg, #ffb3f6, var(--pink) 10%, var(--violet) 35%, var(--cyan-glow) 85%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  /* color: transparent; */
   filter: drop-shadow(0 0 14px rgb(220 94 229 / 0.45));
 }
 
@@ -1800,8 +1804,8 @@ html.is-solo body {
 }
 
 @keyframes brand-shimmer {
-  from { background-position: 0% 50%; }
-  to { background-position: 100% 50%; }
+  from { background-position: 60% 0%; }
+  to { background-position: 70% 0%; }
 }
 
 .finale.is-solo .finale__grid {
