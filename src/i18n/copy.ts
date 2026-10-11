@@ -108,7 +108,18 @@ export const copy = {
       'a block cleared before anyone saw it',
       'iteration 0.1 → 0.2 ···',
       'signal ██████████ · classified'
-    ]
+    ],
+    solo: {
+      metaTitle: 'The new era of organizations',
+      title: 'The <em>new era</em> of organizations.',
+      agent: 'agent',
+      nodes: { project: 'Project', area: 'Area', team: 'Team', component: 'Component', goal: 'Goal', report: 'Report', product: 'Product' },
+      feed: {
+        mixed: ['{a} prepared context for {b}', '{a} picked up {b} where it stopped', '{a} drafted a proposal for {b}', '{a} spotted a risk in {b}'],
+        agents: ['{a} → {b} · handoff', '{a} and {b} split the work', '{a} asked {b} for a second look', '{a} ↔ {b} · in sync'],
+        nodes: ['{a} ↔ {b} · dependency found', '{a} now feeds {b}', '{a} and {b} · aligned', '{a} unblocked {b}']
+      }
+    }
   },
   es: {
     metaTitle: 'Algo está despertando',
@@ -162,7 +173,18 @@ export const copy = {
       'bloqueo resuelto antes de que nadie lo viera',
       'iteración 0.1 → 0.2 ···',
       'señal ██████████ · clasificado'
-    ]
+    ],
+    solo: {
+      metaTitle: 'La nueva era de las organizaciones',
+      title: 'La <em>nueva era</em> de las organizaciones.',
+      agent: 'agente',
+      nodes: { project: 'Proyecto', area: 'Área', team: 'Equipo', component: 'Componente', goal: 'Objetivo', report: 'Reporte', product: 'Producto' },
+      feed: {
+        mixed: ['{a} preparó contexto para {b}', '{a} retomó {b} donde quedó', '{a} armó una propuesta para {b}', '{a} detectó un riesgo en {b}'],
+        agents: ['{a} → {b} · relevo', '{a} y {b} se reparten el trabajo', '{a} pidió a {b} una segunda mirada', '{a} ↔ {b} · sincronizados'],
+        nodes: ['{a} ↔ {b} · dependencia detectada', '{a} ahora alimenta a {b}', '{a} y {b} · alineados', '{a} desbloqueó {b}']
+      }
+    }
   }
 } as const
 

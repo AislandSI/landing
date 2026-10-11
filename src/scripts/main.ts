@@ -3,10 +3,9 @@ import Lenis from 'lenis'
 import { initLocale, onLocale, phrase } from '../i18n/locale'
 import type { Cosmos } from './cosmos'
 import { mountEyes, type EyesWall } from './eyes'
+import { scramble } from './scramble'
 
 type Point = { x: number; y: number }
-
-const GLYPHS = '▚▞▖▗▘▝░▒▓01/<>'
 
 const clamp = (v: number, min = 0, max = 1) => Math.min(max, Math.max(min, v))
 const smooth = (a: number, b: number, v: number) => {
@@ -14,26 +13,6 @@ const smooth = (a: number, b: number, v: number) => {
   return t * t * (3 - 2 * t)
 }
 const pad = (n: number) => String(n).padStart(2, '0')
-
-const scrambleTokens = new WeakMap<HTMLElement, number>()
-
-function scramble(el: HTMLElement, text: string, duration = 700) {
-  const token = (scrambleTokens.get(el) ?? 0) + 1
-  scrambleTokens.set(el, token)
-  const start = performance.now()
-  const step = (now: number) => {
-    if (scrambleTokens.get(el) !== token) return
-    const progress = clamp((now - start) / duration)
-    const revealed = Math.floor(progress * text.length)
-    let out = text.slice(0, revealed)
-    for (let i = revealed; i < text.length; i++) {
-      out += text[i] === ' ' ? ' ' : GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
-    }
-    el.textContent = out
-    if (progress < 1) requestAnimationFrame(step)
-  }
-  requestAnimationFrame(step)
-}
 
 export function start() {
   const root = document.documentElement

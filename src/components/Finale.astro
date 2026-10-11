@@ -3,14 +3,39 @@ import BrandMark from './BrandMark.astro'
 import { PRODUCT_NAME } from '../config/product'
 import { copy } from '../i18n/copy'
 
+interface Props {
+  titleKey?: 'finale' | 'solo.title'
+  solo?: boolean
+}
+
+const { titleKey = 'finale', solo = false } = Astro.props
 const t = copy.en
 const year = new Date().getFullYear()
+const title = titleKey === 'solo.title' ? t.solo.title : t.finale
+const Title = solo ? 'h1' : 'h2'
+const accentLength = PRODUCT_NAME.toUpperCase().startsWith('AI') ? 2 : 0
+const brandLetters = [...PRODUCT_NAME].map((letter, index) => ({ letter, accent: index < accentLength }))
 ---
 
-<section class="finale" id="senal" data-finale aria-labelledby="finale-title">
+<section class:list={['finale', { 'is-solo': solo }]} id="senal" data-finale aria-labelledby="finale-title">
   <div class="finale__top">
-    <p class="finale__kicker" data-i18n="transmission">{t.transmission}</p>
-    <h2 class="finale__title" id="finale-title" data-i18n-html="finale" set:html={t.finale} />
+    {solo ? (
+      <Title class="finale__title" id="finale-title">
+        <span class="finale__brand">
+          <span class="sr-only">{PRODUCT_NAME}. </span>
+          <span class="finale__brand-line finale__brand-line--start" aria-hidden="true"></span>
+          <span class="finale__brand-name" aria-hidden="true">
+            {brandLetters.map(({ letter, accent }, index) => (
+              <span class:list={['finale__brand-letter', { 'is-accent': accent }]} style={`--li:${index}`}>{letter}</span>
+            ))}
+          </span>
+          <span class="finale__brand-line finale__brand-line--end" aria-hidden="true"></span>
+        </span>
+        <span class="finale__claim" data-i18n-html={titleKey} set:html={title} />
+      </Title>
+    ) : (
+      <Title class="finale__title" id="finale-title" data-i18n-html={titleKey} set:html={title} />
+    )}
   </div>
 
   <div class="finale__grid">

@@ -53,7 +53,8 @@ export function applyLocale(next: Lang, persist = false) {
   const root = document.documentElement
   root.lang = current
 
-  document.title = `${PRODUCT_NAME} — ${text.metaTitle}`
+  const title = lookup(text, root.dataset.titleKey ?? '') || text.metaTitle
+  document.title = `${PRODUCT_NAME} — ${title}`
   document.querySelector('meta[name="description"]')?.setAttribute('content', text.metaDescription)
   document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title)
   document.querySelector('meta[property="og:description"]')?.setAttribute('content', text.metaDescription)

@@ -26,6 +26,8 @@ export interface CosmosFrame {
 
 export interface Cosmos {
   render(frame: CosmosFrame): void
+  /** Screen position (NDC) of the current form's centre, after the last render. */
+  center(): { x: number; y: number }
   shock(ndcX: number, ndcY: number): void
   resize(): void
   destroy(): void
@@ -153,7 +155,7 @@ export function canRunCosmos() {
   }
 }
 
-export function mountCosmos(canvas: HTMLCanvasElement): Cosmos {
+export function mountCosmos(canvas: HTMLCanvasElement, options: { morph?: number } = {}): Cosmos {
   const narrow = () => window.innerWidth / window.innerHeight < 0.9
   const count = window.innerWidth < 760 ? 6500 : 15000
 
@@ -210,8 +212,9 @@ export function mountCosmos(canvas: HTMLCanvasElement): Cosmos {
   const tmp = new Vector3()
   const dir = new Vector3()
   const mouseWorld = new Vector3(99, 99, 0)
-  let morph = 0
+  let morph = options.morph ?? 0
   let fade = 0
+  const centerNdc = new Vector3()
   let mouseStrength = 0
   let shockStart = -99
   let lastTime = 0
@@ -311,7 +314,11 @@ export function mountCosmos(canvas: HTMLCanvasElement): Cosmos {
       uniforms.uShockTime.value = frame.time - shockStart
 
       renderer.render(scene, camera)
+      centerNdc.copy(group.position).project(camera)
       lastTime = frame.time
+    },
+    center() {
+      return { x: centerNdc.x, y: centerNdc.y }
     },
     shock(ndcX, ndcY) {
       toWorld(ndcX, ndcY, uniforms.uShockOrigin.value)

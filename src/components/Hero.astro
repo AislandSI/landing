@@ -1,5 +1,6 @@
 ---
 import BrandMark from './BrandMark.astro'
+import Hud from './Hud.astro'
 import { PRODUCT_NAME } from '../config/product'
 import { copy } from '../i18n/copy'
 
@@ -17,23 +18,7 @@ const bots = [
 ---
 
 <section class="hero" id="inicio" data-hero>
-  <header class="hud">
-    <a class="lockup" href="#inicio" data-cursor-key="home" data-cursor-text={t.cursor.home}>
-      <BrandMark class="lockup__mark" />
-      <span class="lockup__name">{PRODUCT_NAME}</span>
-    </a>
-    <span class="hud__status" role="status">
-      <span class="hud__beat" aria-hidden="true"></span>
-      <span><span data-agents>07</span> <span data-i18n="agents">{t.agents}</span></span>
-    </span>
-    <div class="hud__tools">
-      <div class="hud__lang" role="group" aria-label={t.langLabel} data-i18n-aria="langLabel">
-        <button type="button" data-lang="en" aria-pressed="true">EN</button>
-        <button type="button" data-lang="es" aria-pressed="false">ES</button>
-      </div>
-      <span class="hud__clock" aria-hidden="true"><span data-clock>--:--:--</span> · <span data-i18n="signal">{t.signal}</span></span>
-    </div>
-  </header>
+  <Hud />
 
   <div class="hero__stage" data-stage>
     <svg class="orbits" viewBox="-500 -500 1000 1000" aria-hidden="true" data-orbits>

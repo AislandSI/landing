@@ -6,16 +6,21 @@ import { copy } from '../i18n/copy'
 interface Props {
   title?: string
   description?: string
+  /** Dictionary path used for the document title when the language changes. */
+  titleKey?: string
+  solo?: boolean
 }
 
 const {
   title = `${PRODUCT_NAME} — ${copy.en.metaTitle}`,
-  description = copy.en.metaDescription
+  description = copy.en.metaDescription,
+  titleKey,
+  solo = false
 } = Astro.props
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class={solo ? 'is-solo' : undefined} data-title-key={titleKey}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,7 +36,7 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Syne:ital,wght@1,400;1,500;1,600&family=Unbounded:wght@500..800&display=swap"
       rel="stylesheet"
     />
     <script is:inline>
@@ -44,9 +49,5 @@ const {
   </head>
   <body>
     <slot />
-    <script>
-      import { start } from '../scripts/main'
-      start()
-    </script>
   </body>
 </html>
