@@ -39,7 +39,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  filter: saturate(0.8);
+  filter: saturate(0.7);
 }
 
 html.lenis,
@@ -1699,6 +1699,8 @@ html.is-solo body {
 .finale__claim {
   display: block;
   text-wrap: balance;
+  font-weight: 100;
+  font-family: 'Poppins', sans-serif;
 }
 
 .finale.is-solo .finale__title em {

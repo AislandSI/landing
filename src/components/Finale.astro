@@ -39,14 +39,6 @@ const brandLetters = [...PRODUCT_NAME].map((letter, index) => ({ letter: letter.
   </div>
 
   <div class="finale__grid">
-    <div class="feed" aria-hidden="true">
-      <div class="feed__head">
-        <span class="feed__dot"></span>
-        <span data-i18n="activity">{t.activity}</span>
-        <span class="feed__live" data-i18n="live">{t.live}</span>
-      </div>
-      <ol class="feed__list" data-feed></ol>
-    </div>
 
     <button class="seal" type="button" data-seal data-cursor-key="press" data-cursor-text={t.cursor.press} data-i18n-aria="soon" aria-label={t.soon}>
       <svg class="seal__ring" viewBox="0 0 200 200" aria-hidden="true">
